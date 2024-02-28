@@ -3191,7 +3191,6 @@
             
             default:
                 return false;
-                break;
         }
         this.mode = modeTo;
         return true;
@@ -13401,6 +13400,7 @@ LGraphNode.prototype.executeAction = function(action)
             	}
                 if (!_slot.nameLocked){
 	                menu_info.push({ content: "Rename Slot", slot: slot });
+	                menu_info.push({ content: "Test Hierarchy", slot: slot });
                 }
     
             }
@@ -13508,6 +13508,33 @@ LGraphNode.prototype.executeAction = function(action)
                     e.stopPropagation();
                 });
                 input.focus();
+            } else if (v.content == "Test Hierarchy") {
+                // console.log(v.slot);
+                var info = v.slot;
+                var slot_info = info.input
+                    ? node.getInputInfo(info.slot)
+                    : node.getOutputInfo(info.slot);
+                var dialog = that.createDialog(
+                    `
+                    <select autofocus type='number' class='value'>
+                        <option value='1'>一层</option>
+                        <option value='2'>二层</option>
+                        <option value='3'>三层</option>
+                    </select>
+                    `,
+                    options
+                );
+                const selectDom = dialog.querySelector("select")
+                if (selectDom && slot_info) {
+                    selectDom.value = slot_info.hierarchy || 1;
+                }
+                selectDom.addEventListener("change", function() {
+                    var selectedValue = selectDom.value;
+                    slot_info.hierarchy = Number(selectedValue)
+                    // that.setDirty(true);
+                    // node.graph.afterChange();
+                    console.log(slot_info);
+                });
             }
 
             //if(v.callback)
@@ -15769,14 +15796,11 @@ LiteGraph.registerNodeType("basic/jsonparse", JSONParse);
 				if(this.graph)
 					return this.graph.vars;
 				return {};
-				break;
 			case Variable.GLOBALSCOPE:
 				return global;
-				break;
 			case Variable.LITEGRAPH:
 			default:
 				return LiteGraph.Globals;
-				break;
 		}
 	}
 
@@ -18541,7 +18565,7 @@ LiteGraph.registerNodeType("events/waitAll", WaitAll);
     //Math operation
     function MathOperation() {
         this.addInput("A", "number,array,object");
-        this.addInput("B", "number,array,object");
+        this.addInput("B", "number,array,object", { hierarchy: 2 }); // 层级 hierarchy: (1 ~ 3)
         this.addOutput("=", "number");
         this.addProperty("A", 1);
         this.addProperty("B", 1);
@@ -18601,6 +18625,9 @@ LiteGraph.registerNodeType("events/waitAll", WaitAll);
     MathOperation.prototype.onExecute = function() {
         var A = this.getInputData(0);
         var B = this.getInputData(1);
+        const hierarchy = this.inputs[1].hierarchy
+        console.log(hierarchy);
+        // debugger
         if ( A != null ) {
 			if( A.constructor === Number )
 	            this.properties["A"] = A;
@@ -19557,7 +19584,6 @@ LiteGraph.registerNodeType("events/waitAll", WaitAll);
 				break;
 			case LGraphTexture.REUSE:
 				return origin;
-				break;
 			case LGraphTexture.COPY:
 			default:
 				tex_type = origin ? origin.type : gl.UNSIGNED_BYTE;
@@ -25894,37 +25920,29 @@ void main(void){\n\
             case "NOTE ON":
             case "NOTEON":
                 return MIDIEvent.NOTEON;
-                break;
             case "NOTE OFF":
             case "NOTEOFF":
                 return MIDIEvent.NOTEON;
-                break;
             case "KEY PRESSURE":
             case "KEYPRESSURE":
                 return MIDIEvent.KEYPRESSURE;
-                break;
             case "CONTROLLER CHANGE":
             case "CONTROLLERCHANGE":
             case "CC":
                 return MIDIEvent.CONTROLLERCHANGE;
-                break;
             case "PROGRAM CHANGE":
             case "PROGRAMCHANGE":
             case "PC":
                 return MIDIEvent.PROGRAMCHANGE;
-                break;
             case "CHANNEL PRESSURE":
             case "CHANNELPRESSURE":
                 return MIDIEvent.CHANNELPRESSURE;
-                break;
             case "PITCH BEND":
             case "PITCHBEND":
                 return MIDIEvent.PITCHBEND;
-                break;
             case "TIME TICK":
             case "TIMETICK":
                 return MIDIEvent.TIMETICK;
-                break;
             default:
                 return Number(str); //assume its a hex code
         }
