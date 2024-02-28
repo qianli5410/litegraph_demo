@@ -93,11 +93,24 @@ async function initLiteGraph(): Promise<void> {
   node_const.setValue(7.8);
 
   // @ts-ignore
+  const node_const2 = LiteGraph.createNode("basic/const") as any;
+  node_const2.pos = [200, 700];
+  graph.add(node_const2);
+  node_const2.setValue(5.2);
+
+  // @ts-ignore
+  const node_operation = LiteGraph.createNode("math/operation") as any;
+  node_operation.pos = [500, 400];
+  graph.add(node_operation);
+
+  // @ts-ignore
   const node_watch = LiteGraph.createNode("basic/watch");
   node_watch.pos = [700, 200];
   graph.add(node_watch);
 
-  node_const.connect(0, node_watch, 0);
+  node_const.connect(0,  node_operation, 0);
+  node_const2.connect(0,  node_operation, 1);
+  node_operation.connect(0,  node_watch, 0);
 
   // 处理结果
   console.log("node_watch：", node_watch);

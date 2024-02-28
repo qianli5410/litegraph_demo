@@ -13400,7 +13400,10 @@ LGraphNode.prototype.executeAction = function(action)
             	}
                 if (!_slot.nameLocked){
 	                menu_info.push({ content: "Rename Slot", slot: slot });
-	                menu_info.push({ content: "Test Hierarchy", slot: slot });
+                    if(slot.input.hierarchy === 0) {
+                        menu_info.push({ content: `层级递增 （当前：${slot.input.hierarchy}）`, slot: slot });
+                        menu_info.push({ content: `层级递减 （当前：${slot.input.hierarchy}）`, slot: slot });
+                    }
                 }
     
             }
@@ -13508,35 +13511,15 @@ LGraphNode.prototype.executeAction = function(action)
                     e.stopPropagation();
                 });
                 input.focus();
-            } else if (v.content == "Test Hierarchy") {
-                // console.log(v.slot);
+            } else if (v.content.includes("层级递")) {
                 var info = v.slot;
-                var slot_info = info.input
-                    ? node.getInputInfo(info.slot)
-                    : node.getOutputInfo(info.slot);
-                var dialog = that.createDialog(
-                    `
-                    <select autofocus type='number' class='value'>
-                        <option value='1'>一层</option>
-                        <option value='2'>二层</option>
-                        <option value='3'>三层</option>
-                    </select>
-                    `,
-                    options
-                );
-                const selectDom = dialog.querySelector("select")
-                if (selectDom && slot_info) {
-                    selectDom.value = slot_info.hierarchy || 1;
-                }
-                selectDom.addEventListener("change", function() {
-                    var selectedValue = selectDom.value;
-                    slot_info.hierarchy = Number(selectedValue)
-                    // that.setDirty(true);
-                    // node.graph.afterChange();
-                    console.log(slot_info);
-                });
+                var slot_info = info.input ? node.getInputInfo(info.slot) : node.getOutputInfo(info.slot);
+                const TopLine = slot_info.hierarchy < 1;
+                const TopLine_ = slot_info.hierarchy > -1;
+                if(v.content.includes("层级递增") && TopLine) slot_info.hierarchy = Number(slot_info.hierarchy) + 1
+                if(v.content.includes("层级递减") && TopLine_) slot_info.hierarchy = Number(slot_info.hierarchy) - 1
+                console.log(slot_info.hierarchy)
             }
-
             //if(v.callback)
             //	return v.callback.call(that, node, options, e, menu, that, event );
         }
@@ -18565,7 +18548,7 @@ LiteGraph.registerNodeType("events/waitAll", WaitAll);
     //Math operation
     function MathOperation() {
         this.addInput("A", "number,array,object");
-        this.addInput("B", "number,array,object", { hierarchy: 2 }); // 层级 hierarchy: (1 ~ 3)
+        this.addInput("B", "number,array,object", { hierarchy: 0 }); // hierarchy: 自定义属性层级 (默认为0 可以无限加加或减减)
         this.addOutput("=", "number");
         this.addProperty("A", 1);
         this.addProperty("B", 1);
@@ -18626,8 +18609,7 @@ LiteGraph.registerNodeType("events/waitAll", WaitAll);
         var A = this.getInputData(0);
         var B = this.getInputData(1);
         const hierarchy = this.inputs[1].hierarchy
-        console.log(hierarchy);
-        // debugger
+        // console.log(hierarchy);
         if ( A != null ) {
 			if( A.constructor === Number )
 	            this.properties["A"] = A;
