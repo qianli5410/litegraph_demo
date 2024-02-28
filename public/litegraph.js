@@ -13400,7 +13400,8 @@ LGraphNode.prototype.executeAction = function(action)
             	}
                 if (!_slot.nameLocked){
 	                menu_info.push({ content: "Rename Slot", slot: slot });
-                    if(slot.input.hierarchy === 0) {
+                    
+                    if(Object.keys(slot.input).includes("hierarchy")) {
                         menu_info.push({ content: `层级递增 （当前：${slot.input.hierarchy}）`, slot: slot });
                         menu_info.push({ content: `层级递减 （当前：${slot.input.hierarchy}）`, slot: slot });
                     }
@@ -13516,8 +13517,8 @@ LGraphNode.prototype.executeAction = function(action)
                 var slot_info = info.input ? node.getInputInfo(info.slot) : node.getOutputInfo(info.slot);
                 const TopLine = slot_info.hierarchy < 1;
                 const TopLine_ = slot_info.hierarchy > -1;
-                if(v.content.includes("层级递增") && TopLine) slot_info.hierarchy = Number(slot_info.hierarchy) + 1
-                if(v.content.includes("层级递减") && TopLine_) slot_info.hierarchy = Number(slot_info.hierarchy) - 1
+                if(v.content.includes("层级递增")) slot_info.hierarchy = Number(slot_info.hierarchy) + 1
+                if(v.content.includes("层级递减")) slot_info.hierarchy = Number(slot_info.hierarchy) - 1
                 console.log(slot_info.hierarchy)
             }
             //if(v.callback)
